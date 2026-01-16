@@ -49,6 +49,8 @@ func (s *Server) handleConnection(conn net.Conn) {
 
 	reader := bufio.NewReader(conn)
 
+	writer := bufio.NewWriter(conn)
+
 	for {
 
 		args, err := respParser(reader)
@@ -63,6 +65,21 @@ func (s *Server) handleConnection(conn net.Conn) {
 			return
 		}
 
-		fmt.Printf("parsed command: %#v\n", args)
+		command := args[0]
+		args = args[1:]
+		fmt.Printf("parsed command and args from %v: %s, %#v\n", conn.RemoteAddr(), command, args)
+
+		response := handleCommand(command, args)
+
+		_, err = writer.WriteString(response)
+		if err != nil {
+			fmt.Printf("write error: %v\n", err)
+			return
+		}
+
+		writer.Flush()
+
+		fmt.Println("response sent to", conn.RemoteAddr())
+
 	}
 }
