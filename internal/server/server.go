@@ -5,14 +5,17 @@ import (
 	"fmt"
 	"io"
 	"net"
+
+	"github.com/saicharith2012/goredis/internal/store"
 )
 
 type Server struct {
 	port string
+	store *store.SharedState
 }
 
-func New(port string) *Server {
-	return &Server{port: port}
+func New(port string, store *store.SharedState) *Server {
+	return &Server{port: port, store: store}
 }
 
 func (s *Server) Run() error {
@@ -69,7 +72,7 @@ func (s *Server) handleConnection(conn net.Conn) {
 		args = args[1:]
 		fmt.Printf("parsed command and args from %v: %s, %#v\n", conn.RemoteAddr(), command, args)
 
-		response := handleCommand(command, args)
+		response := handleCommand(s , command, args)
 
 		_, err = writer.WriteString(response)
 		if err != nil {

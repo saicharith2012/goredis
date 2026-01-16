@@ -5,11 +5,13 @@ import (
 
 	"github.com/saicharith2012/goredis/internal/config"
 	"github.com/saicharith2012/goredis/internal/server"
+	"github.com/saicharith2012/goredis/internal/store"
 )
 
 func main() {
 	cfg := config.Default()
-	srv := server.New(cfg.Port)
+	store := store.NewSharedState()
+	srv := server.New(cfg.Port, store)
 
 	if err := srv.Run(); err != nil {
 		log.Fatal(err)
